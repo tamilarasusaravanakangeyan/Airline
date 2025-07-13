@@ -1,0 +1,72 @@
+@startuml
+skinparam handwritten true
+skinparam monochrome true
+skinparam packageStyle rect
+skinparam defaultFontName "Nimbus Sans"
+skinparam defaultFontSize 14
+
+actor Customer as C
+participant "Travel Agency\n(OTA/TMC)" as TA
+participant "Metasearch/\nAggregator" as Agg
+participant "Global Distribution System" as GDS
+participant "ATPCO\n(Fare Data)" as ATPCO
+participant "Airline" as Airline
+participant "Airline CRS &\nOrder Mgmt" as AirlineCRS
+participant "Fraud System /\nPayment Gateway" as FG
+participant "Card Networks /\nBanks" as Banks
+participant "BSP / ARC\n(Settlement)" as Settle
+participant "Airline Auditing Team" as Audit
+
+C -> TA: 1. Request Travel & Preferences
+TA -> Agg: 2. Search & Compare (optional)
+Agg --> TA: 3. Redirect to TA/Airline (with options)
+TA -> GDS: 4. Search Availability & Fares (Traditional/NDC)
+GDS -> ATPCO: 5a. Query Fare Rules (Traditional)
+ATPCO --> GDS: 5b. Provide Fare Data
+GDS -> AirlineCRS: 6. Query Real-time Availability (Traditional/NDC)
+AirlineCRS --> GDS: 7. Provide Real-time Inventory/Offer
+GDS --> TA: 8. Display Flight Options & Pricing
+
+TA -> GDS: 9. Select Option & Initiate Booking (Provisional Hold)
+GDS -> AirlineCRS: 10. Request PNR Creation
+note right of AirlineCRS: **Inventory is now Tied-Up**
+AirlineCRS --> GDS: 11. Create PNR, Assign PNR Code, Set Ticketing Time Limit
+GDS --> TA: 12. PNR Created, PNR Code Returned
+
+TA -> C: 13. Present PNR, Time Limit, & Request Payment
+C -> TA: 14. Provide Payment Details
+
+TA -> FG: 15. Submit Payment for Authorization
+FG -> Banks: 16. Authorize Payment
+Banks --> FG: 17. Payment Approval/Decline
+FG --> TA: 18. Payment Status
+
+alt Payment Approved
+    TA -> TA: 19. (Internal) Fraud Check/Risk Mgmt
+    TA -> GDS: 20. Request Ticketing (within Time Limit)
+    GDS -> AirlineCRS: 21. Trigger E-Ticket Issuance
+    note right of AirlineCRS: **Tied-Up Inventory becomes Ticketed (Revenue Recognition)**
+    AirlineCRS --> GDS: 22. Issue E-Ticket, Provide Ticket Number
+    GDS --> TA: 23. E-Ticket Confirmation & Number
+
+    TA -> C: 24. Send E-Ticket & Itinerary
+    TA -> Settle: 25. Report Sales for Settlement (e.g., daily)
+    Settle -> Audit: 26. Provide ARI/ABI Data to Airline Audit
+    Audit -> Audit: 27. Analyze for Violations & Compliance
+    Audit --> Airline: 28. Report Findings (e.g., ADM recommendations)
+    Settle --> TA: 29. Generate Billing Report (e.g., weekly)
+    TA -> Settle: 30. Consolidated Payment to Clearing Bank
+    Settle -> Airline: 31. Distribute Funds to Airline
+else Payment Declined or Time Limit Expired
+    TA -> C: 19. Notify Customer of Decline/Expiration
+    TA -> GDS: 20. Cancel PNR / System Auto-Cancels
+    GDS -> AirlineCRS: 21. Release Inventory
+    note right of AirlineCRS: **Tied-Up Inventory is Released**
+end
+
+C -> AirlineCRS: 32. Access PNR/Ticket for Check-in/Manage Booking
+TA -> GDS: 33. Manage Booking Changes/Cancellations
+GDS -> AirlineCRS: 34. Update PNR/Ticket
+AirlineCRS -> AirlineCRS: 35. PNR Archived Post-Travel
+
+@enduml

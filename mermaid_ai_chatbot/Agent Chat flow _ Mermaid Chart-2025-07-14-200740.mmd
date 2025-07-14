@@ -1,0 +1,13 @@
+graph TD
+    A[Travel Agency Frontend: Trade Portal Web] --> B(API Gateway/Load Balancer);
+
+    B --> C(Chatbot Service - Semantic Kernel & MCP);
+    C --> D(Azure OpenAI Services: GPT Models, Embeddings);
+    C --> E(Internal Knowledge Base: Vector Database);
+    C --> F(Travel Agency APIs: Self Service Microservices);
+    C --> G(Additional Data Sources: **Future Expansion);
+
+    D -- Fine-tuning/Training Data --> H(Model with RAG and Tooling capability);
+    E -- Sync/Update --> I(Live Data Source);
+    F -- Sync/Update --> I;
+    G -- Sync/Update --> I;

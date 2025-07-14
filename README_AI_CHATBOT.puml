@@ -1,0 +1,32 @@
+@startuml
+skinparam handwritten false
+skinparam shadowing false
+skinparam titleFontSize 20
+skinparam defaultTextAlignment center
+
+title Airline Travel Agency Chatbot Architecture
+
+rectangle "Travel Agency Frontend: \nTrade Portal Web" as A
+cloud "API Gateway/Load Balancer" as B
+rectangle "Chatbot Service - \nSemantic Kernel & MCP" as C
+rectangle "Azure OpenAI Services: \nGPT Models, Embeddings" as D
+database "Internal Knowledge Base: \nVector Database" as E
+rectangle "Travel Agency APIs: \nSelf Service Microservices" as F
+rectangle "Additional Data Sources: \n**Future Expansion**" as G
+rectangle "Model with RAG \nand Tooling capability" as H
+database "Live Data Source" as I
+
+A -- B
+B -- C
+
+C -- D
+C -- E
+C -- F
+C -- G
+
+D -- H : Fine-tuning/Training Data
+E -- I : Sync/Update
+F -- I : Sync/Update
+G -- I : Sync/Update
+
+@enduml

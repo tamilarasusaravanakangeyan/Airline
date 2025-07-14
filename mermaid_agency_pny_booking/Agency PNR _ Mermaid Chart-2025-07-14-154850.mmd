@@ -1,0 +1,87 @@
+graph TD
+    subgraph Customer Interaction
+        C[Customer] -- "1.Request Travel & Provide Info" --> TA{Travel Agency<br> OTA / TMC };
+        TA -- "2.Present Options" --> C;
+        C -- "3.Confirm Booking & Payment Method" --> TA;
+    end
+
+    subgraph Content Sourcing & Offer Creation
+        TA -- "4a.Search & Avail.  Traditional GDS " --> GDS[Global Distribution System<br> e.g., Amadeus, Sabre, Travelport ];
+        GDS -- "4a.Query Airline CRS & ATPCO" --> AirlineCRS[Airline Central Reservation System  CRS ] & ATPCO[ATPCO<br> Fare/Rule Data ];
+        ATPCO -- "Files Fares/Rules" --> Airline[Airline];
+        AirlineCRS -- "Provides Avail. & Legacy Fares" --> GDS;
+
+        Airline -- "Files Published Fares/Rules" --> ATPCO;
+
+        subgraph Airline Direct/NDC Offer Systems
+            Airline -->|Internal Systems| OfferMgt[Airline Offer Management System];
+            OfferMgt -- "4b.Distributes NDC Offers  Direct API / via GDS NDC Channel " --> TA & GDS;
+        end
+
+        TA -- "4c.Search & Compare  Metasearch/Aggregator " --> Aggregator[Metasearch/Fare Aggregator<br> e.g., Skyscanner, Google Flights ];
+        Aggregator -- "Queries OTAs, Airlines  APIs , GDS, ATPCO  indirectly " --> OTA_Site[Other OTA Websites] & Airline & GDS & ATPCO;
+        Aggregator -- "Redirects to TA or Airline" --> TA;
+    end
+
+    subgraph Booking & Payment & PNR Management
+        TA -- "5.Select Offer & Initiate Booking" --> GDS;
+        GDS -- "6.Create PNR  Sends Data to Airline CRS " --> AirlineCRS;
+        AirlineCRS -- "7.Generates PNR Code & Updates OrderMgt" --> GDS & OrderMgt[Airline Order Management System];
+        GDS -- "8.Confirms PNR & Fare Rules" --> TA;
+
+        TA -- "9.Submit Payment Details" --> PaymentGateway[Payment Gateway];
+        PaymentGateway -- "10.Encrypt & Transmit for Authorization" --> CardNetwork[Card Network<br> Visa, MC, Amex ];
+        CardNetwork -- "11.Request Authorization" --> IssuingBank[Issuing Bank<br> Customer's Bank ];
+        IssuingBank -- "12.Approve/Decline & Send Funds" --> CardNetwork;
+        CardNetwork -- "13.Settlement Request" --> AcquiringBank[Acquiring Bank<br> Agency's Bank ];
+        AcquiringBank -- "14.Funds to Agency Merchant Account" --> TA;
+        PaymentGateway -- "15.Payment Confirmation/Declination" --> TA;
+
+        TA -- "Fraud Detection Screening" --> FraudSystem[Fraud Detection System<br> Internal/3rd Party ];
+        FraudSystem -- "Alert/Block/Approve" --> TA;
+
+        TA -- "16.Present PNR & Payment Status to Customer" --> C;
+    end
+
+    subgraph Ticketing & Financial Settlement
+        TA -- "17.Payment Confirmed, Issue Ticket  via GDS " --> GDS;
+        GDS -- "18.Triggers Ticket Issuance in Airline CRS" --> AirlineCRS;
+        AirlineCRS -- "19.Issues E-Ticket  linked to PNR " --> TA;
+        OrderMgt -- "19a.Updates Order Status" --> AirlineCRS;
+        TA -- "20.Send E-Ticket & Confirmation to Customer" --> C;
+
+        TA -- "21.Report Sales" --> BSP_ARC[BSP / ARC<br> Settlement Plan ];
+        BSP_ARC -- "22.Consolidate Billing Reports" --> TA;
+        TA -- "23.Consolidated Payment to Clearing Bank" --> ClearingBank[IATA / ARC Clearing Bank];
+        ClearingBank -- "24.Distribute Funds  Net of Agency Remuneration " --> Airline;
+
+        NoteAF[Note A: Airlines may pay commissions  less common now , agencies often charge service fees to customers, or work on net fares. Remuneration flows here.]
+        NoteBF[Note B: For NDC bookings, payment and ticketing may be handled more directly between Agency/Payment Gateway and Airline's Order Management, bypassing some GDS/CRS steps, but still settling via BSP/ARC.]
+    end
+
+    subgraph Post-Booking & Management
+        C -- "Access PNR for Check-in/Manage Booking" --> AirlineCRS;
+        TA -- "Manage Bookings  Changes/Cancellations " --> GDS;
+        GDS -- "Update PNR in Airline CRS & OrderMgt" --> AirlineCRS & OrderMgt;
+        OrderMgt -- "Updates Internal Records" --> Airline;
+        AirlineCRS -- "PNR Archived Post-Travel" --> Archive[Airline PNR Archive];
+    end
+
+    style C fill:#DDEBF7,stroke:#336699,stroke-width:2px,color:#336699
+    style TA fill:#DDEBF7,stroke:#336699,stroke-width:2px,color:#336699
+    style GDS fill:#E6F7D1,stroke:#6AA73A,stroke-width:2px,color:#6AA73A
+    style Airline fill:#FFF2CC,stroke:#FFC000,stroke-width:2px,color:#FFC000
+    style AirlineCRS fill:#FFF2CC,stroke:#FFC000,stroke-width:2px,color:#FFC000
+    style ATPCO fill:#E1F7D1,stroke:#6AA73A,stroke-width:2px,color:#6AA73A
+    style Aggregator fill:#E0EBF7,stroke:#4B8DCF,stroke-width:2px,color:#4B8DCF
+    style BSP_ARC fill:#F2E5FF,stroke:#9370DB,stroke-width:2px,color:#9370DB
+    style ClearingBank fill:#F2E5FF,stroke:#9370DB,stroke-width:2px,color:#9370DB
+    style OTA_Site fill:#DDEBF7,stroke:#336699,stroke-width:2px,color:#336699
+    style Archive fill:#F2F2F2,stroke:#A0A0A0,stroke-width:1px,color:#555555
+    style PaymentGateway fill:#F0F8FF,stroke:#1E90FF,stroke-width:2px,color:#1E90FF
+    style CardNetwork fill:#F0F8FF,stroke:#1E90FF,stroke-width:2px,color:#1E90FF
+    style IssuingBank fill:#F0F8FF,stroke:#1E90FF,stroke-width:2px,color:#1E90FF
+    style AcquiringBank fill:#F0F8FF,stroke:#1E90FF,stroke-width:2px,color:#1E90FF
+    style FraudSystem fill:#FFF5EE,stroke:#FF8C00,stroke-width:2px,color:#FF8C00
+    style OfferMgt fill:#FFFAEE,stroke:#DAA520,stroke-width:2px,color:#DAA520
+    style OrderMgt fill:#FFFAEE,stroke:#DAA520,stroke-width:2px,color:#DAA520

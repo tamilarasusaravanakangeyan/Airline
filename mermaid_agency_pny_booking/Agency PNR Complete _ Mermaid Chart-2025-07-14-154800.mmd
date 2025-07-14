@@ -1,0 +1,65 @@
+graph TD
+    subgraph Customer Interaction
+        C[Customer] --> TA{Travel Agency<br> OTA / TMC};
+        TA -- "1.Request Travel" --> C;
+        TA -- "2.Collect Passenger & Itinerary Data" --> TA;
+    end
+
+    subgraph Content Sourcing & Offer Creation
+        TA -- "3a.Search & Availability Traditional GDS" --> GDS[Global Distribution System<br>e.g., Amadeus, Sabre, Travelport];
+        GDS -- "4aQuery Airline CRS & ATPCO for Fares/Rules" --> AirlineCRS[Airline Central Reservation System CRS] & ATPCO[ATPCO<br>Fare/Rule Data];
+        ATPCO -- "Files Fares/Rules" --> Airline[Airline];
+        AirlineCRS -- "Provides Availability & Legacy Fares" --> GDS;
+        GDS -- "3b.Search & Availability (NDC offers via GDS NDC Channel)" --> Airline[Airline];
+
+        TA -- "3c.Search & Availability (Direct NDC API)" --> Airline[Airline];
+        Airline -- "Creates & Distributes Offers (NDC API)" --> TA;
+
+        TA -- "3d.Search & Compare <br>Metasearch/Aggregator" --> Aggregator[Metasearch/Fare Aggregator<br>e.g., Skyscanner, Google Flights];
+        Aggregator -- "Queries OTAs, Airlines (via APIs), GDS" --> OTA_Site[Other OTA Websites] & Airline[Airline] & GDS;
+        Aggregator -- "Redirects for Booking" --> TA;
+
+        Airline -->|"Files Published Fares/Rules"| ATPCO;
+    end
+
+    subgraph Booking & PNR Management
+        TA -- "5.Select Offer & Initiate Booking" --> GDS;
+        GDS -- "6.Create PNR (Sends Data to Airline CRS)" --> AirlineCRS;
+        AirlineCRS -- "7.Generates PNR Code" --> GDS;
+        GDS -- "8.Confirms PNR & Fare Rules" --> TA;
+        TA -- "9.Present Offer & PNR to Customer" --> C;
+        C -- "10.Confirm Booking & Payment" --> TA;
+    end
+
+    subgraph Ticketing & Settlement
+        TA -- "11.Issue Ticket (via GDS)" --> GDS;
+        GDS -- "12.Triggers Ticket Issuance in Airline CRS" --> AirlineCRS;
+        AirlineCRS -- "13.Issues E-Ticket (linked to PNR)" --> TA;
+        TA -- "14.Send E-Ticket & Confirmation to Customer" --> C;
+
+        TA -- "15.Report Sales" --> BSP_ARC[BSP / ARC<br>Settlement Plan];
+        BSP_ARC -- "16.Consolidate Billing Reports" --> TA;
+        TA -- "17.Consolidated Payment to Clearing Bank" --> ClearingBank[IATA / ARC Clearing Bank];
+        ClearingBank -- "18.Distribute Funds (Net of Agency Remuneration)" --> Airline[Airline];
+
+        NoteAB[Note: Agencies often charge service fees to customers, or work on net fares, supplementing/replacing traditional commissions from airlines.]
+    end
+
+    subgraph Post-Booking & Management
+        C -- "Access PNR for Check-in/Manage Booking" --> AirlineCRS;
+        TA -- "Manage Bookings (Changes/Cancellations)" --> GDS;
+        GDS -- "Update PNR in Airline CRS" --> AirlineCRS;
+        AirlineCRS -- "PNR Archived Post-Travel" --> Archive[Airline PNR Archive];
+    end
+
+    style C fill:#DDEBF7,stroke:#336699,stroke-width:2px,color:#336699
+    style TA fill:#DDEBF7,stroke:#336699,stroke-width:2px,color:#336699
+    style GDS fill:#E6F7D1,stroke:#6AA73A,stroke-width:2px,color:#6AA73A
+    style Airline fill:#FFF2CC,stroke:#FFC000,stroke-width:2px,color:#FFC000
+    style AirlineCRS fill:#FFF2CC,stroke:#FFC000,stroke-width:2px,color:#FFC000
+    style ATPCO fill:#E1F7D1,stroke:#6AA73A,stroke-width:2px,color:#6AA73A
+    style Aggregator fill:#E0EBF7,stroke:#4B8DCF,stroke-width:2px,color:#4B8DCF
+    style BSP_ARC fill:#F2E5FF,stroke:#9370DB,stroke-width:2px,color:#9370DB
+    style ClearingBank fill:#F2E5FF,stroke:#9370DB,stroke-width:2px,color:#9370DB
+    style OTA_Site fill:#DDEBF7,stroke:#336699,stroke-width:2px,color:#336699
+    style Archive fill:#F2F2F2,stroke:#A0A0A0,stroke-width:1px,color:#555555

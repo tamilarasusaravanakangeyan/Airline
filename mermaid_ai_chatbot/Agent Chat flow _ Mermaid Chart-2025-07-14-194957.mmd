@@ -1,0 +1,20 @@
+graph LR
+    A[Customer Initiates Chat] --> B{User Input Received}
+    B --> C{Semantic Kernel: Intent & Entity Recognition}
+    C --> D{Semantic Kernel: Skill Selection}
+    D -- No Skill Match/Ambiguous --> E{Azure OpenAI: Clarification/Fallback}
+    E --> F{Customer Provides More Info}
+    F --> C
+
+    D -- Skill Match --> G{Semantic Kernel: Retrieve Info/Call API}
+    G -- Data from Knowledge Base/API --> H{Azure OpenAI: Generate Response}
+    H --> I[Chatbot Responds to Customer]
+
+    G -- Insufficient Info/Complex Query --> J{Semantic Kernel: Escalate to Human}
+    J --> K[Human Agent Intervenes]
+    K --> L[Human Agent Resolves Issue]
+    L --> O
+
+    I --> N{Customer Continues Chat?}
+    N -- Yes --> B
+    N -- No --> O[End Chat]

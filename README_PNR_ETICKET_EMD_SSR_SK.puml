@@ -1,0 +1,80 @@
+@startuml
+skinparam handwritten true
+skinparam shadowing true
+skinparam Nodesep 50
+skinparam Ranksep 50
+
+rectangle "Passenger Name Record (PNR)" as PNR #LightBlue {
+  note "Central Hub for a Passenger's Journey" as N1
+  N1 .. PNR
+
+  rectangle "Passenger Details" as PD
+  rectangle "Itinerary (Flights, Dates, Times)" as IT
+  rectangle "Contact Information" as CI
+  rectangle "Ticketing Information" as TI
+
+  PNR -- PD
+  PNR -- IT
+  PNR -- CI
+  PNR -- TI
+}
+
+rectangle "Electronic Ticket (E-Ticket)" as ET #LightGreen {
+  note "Proof of Payment for Core Flights" as N2
+  N2 .. ET
+
+  rectangle "Ticket Number" as TN
+  rectangle "Fare Details" as FD
+  rectangle "Flight Coupons" as FC
+
+  ET -- TN
+  ET -- FD
+  ET -- FC
+}
+
+rectangle "Electronic Miscellaneous Document (EMD)" as EMD #LightYellow {
+  note "Proof of Payment for Ancillary Services" as N3
+  N3 .. EMD
+
+  rectangle "EMD Number" as EMDN
+  rectangle "Service Details (e.g., Baggage, Seat)" as SD
+  rectangle "Reason for Issuance Code (RFIC)" as RFIC
+
+  EMD -- EMDN
+  EMD -- SD
+  EMD -- RFIC
+}
+
+rectangle "Special Service Request (SSR)" as SSR #Lavender {
+  note "Communicates Specific Service Needs" as N4
+  N4 .. SSR
+
+  rectangle "SSR Code (e.g., WCBD, VGML)" as SC
+  rectangle "Associated Passenger/Segment" as APS
+  rectangle "Free-Flow Text (Optional)" as FFT
+
+  SSR -- SC
+  SSR -- APS
+  SSR -- FFT
+}
+
+rectangle "Special Keyword (SK)" as SK #LightGray {
+  note "Internal Airline/Agency Remarks" as N5
+  N5 .. SK
+
+  rectangle "Internal Notes" as IN
+  rectangle "Tracking Codes" as TC
+
+  SK -- IN
+  SK -- TC
+}
+
+PNR "1" -- "0..N" ET : "Generates/Links To"
+PNR "1" -- "0..N" EMD : "Generates/Links To"
+PNR "1" -- "0..N" SSR : "Contains/Requests"
+PNR "1" -- "0..N" SK : "Contains"
+
+SSR "0..N" -- "0..1" EMD : "Can Trigger Issuance Of (if chargeable)"
+EMD "0..N" -- "0..N" ET : "Can be Associated With (EMD-A)"
+
+@enduml

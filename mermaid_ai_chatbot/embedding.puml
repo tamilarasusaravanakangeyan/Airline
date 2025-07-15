@@ -1,0 +1,22 @@
+@startuml
+
+skinparam linetype ortho
+
+rectangle "Travel Docs\nPDF/MD/MMD" as A
+rectangle "Chunking\nLangChain/Semantic Kernel" as B
+rectangle "Embedding\ntext-embedding-ada-002" as C
+rectangle "Vector DB\nAzure AI Search" as D
+rectangle "Semantic Kernel\nOrchestration" as E
+rectangle "Azure OpenAI\nGPT-4 Response" as F
+rectangle "Response\nText/Markdown" as G
+rectangle "User Interface\nWeb/Mobile App" as H
+
+A -right-> B
+B -right-> C
+C -right-> D
+D -right-> E
+E -right-> F
+F -right-> G
+G -down-> H
+H -right-> A
+@enduml
